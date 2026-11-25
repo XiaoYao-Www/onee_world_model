@@ -5,10 +5,10 @@
   "type": "module",
   "description": "世界模型公開靜態網站：3D 知識宇宙、2.5D 地圖、時間軸、搜尋與來源中心",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc --noEmit && vite build",
-    "preview": "vite preview --port 4173 --strictPort",
-    "typecheck": "tsc --noEmit"
+    "dev": "vite --config app/vite.config.ts",
+    "build": "node scripts/clean.mjs && tsc -p app --noEmit && vite build --config app/vite.config.ts",
+    "preview": "vite preview --config app/vite.config.ts --port 4173 --strictPort",
+    "typecheck": "tsc -p app --noEmit"
   },
   "dependencies": {
     "maplibre-gl": "^5.6.0",
@@ -24,8 +24,5 @@
     "@vitejs/plugin-react": "^5.0.0",
     "typescript": "^5.9.2",
     "vite": "^7.1.0"
-  },
-  "allowScripts": {
-    "esbuild@0.28.2": true
   }
 }

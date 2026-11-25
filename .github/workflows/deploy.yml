@@ -1,20 +1,17 @@
-name: Build and Deploy to GitHub Pages
+name: Build Check
 
-# 只建置／部署倉庫內已提交的網站程式與靜態世界模型資料。
-# 本 workflow 不得連線 FNS／Obsidian，也不使用任何 FNS 憑證。
+# 這個 workflow 只驗證「網站程式可從乾淨 checkout 建置成功」。
+# 公開網站由 DSH 在本機匯出世界模型資料、建置後直接提交到 main，
+# GitHub Pages（分支來源 main / root）即會發布。
+# 這裡不得連線 FNS／Obsidian，也不使用任何 FNS 憑證。
 on:
   push:
     branches: [main]
+  pull_request:
   workflow_dispatch:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: pages
-  cancel-in-progress: true
 
 jobs:
   build:
@@ -27,19 +24,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
-      - uses: actions/configure-pages@v5
-        with:
-          enablement: true
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: dist
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Verify static data was bundled
+        run: |
+          test -f index.html
+          test -f model-data/meta.json
+          test -d assets
