@@ -19,18 +19,18 @@ export function nodeSpan(node: WmNode): [number | null, number | null] {
     return Number.isNaN(t) ? null : t;
   };
   const start = toMs(node.start);
-  const end = toMs(node.end) ?? start;
+  const end = toMs(node.end);
   if (start == null && end == null) return [null, null];
-  return [start ?? end, end ?? start];
+  // 只有開始時間、沒有結束時間者代表「仍在持續」，結束端保持 null（開放區間），
+  // 不可用開始時間代替結束時間，否則 1987 年成立且仍存在的組織會被誤判為已消失。
+  return [start ?? end, end];
 }
 
 export function inWindow(node: WmNode, w: TimeWindow): boolean {
   const [start, end] = nodeSpan(node);
   if (start == null && end == null) return true;
-  const s = start as number;
-  const e = (end as number) ?? s;
-  if (w.from != null && e < w.from) return false;
-  if (w.to != null && s > w.to) return false;
+  if (w.from != null && end != null && end < w.from) return false;
+  if (w.to != null && start != null && start > w.to) return false;
   return true;
 }
 

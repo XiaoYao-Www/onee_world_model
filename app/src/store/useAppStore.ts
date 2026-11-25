@@ -110,14 +110,35 @@ export const useAppStore = create<AppState>((set, get) => ({
       }
       const metaFrom = parseTime(model.meta.time_range?.[0]);
       const metaTo = parseTime(model.meta.time_range?.[1]);
-      const from = Math.min(metaFrom ?? Date.UTC(2010, 0, 1), ...(starts.length ? starts : [Date.UTC(2010, 0, 1)]));
-      const toRaw = Math.max(metaTo ?? Date.UTC(2027, 0, 1), ...(ends.length ? ends : [Date.UTC(2027, 0, 1)]));
-      const to = toRaw + 365 * DAY;
+      const fullFrom = Math.min(metaFrom ?? Date.UTC(2010, 0, 1), ...(starts.length ? starts : [Date.UTC(2010, 0, 1)]));
+      const fullTo = Math.max(metaTo ?? Date.UTC(2027, 0, 1), ...(ends.length ? ends : [Date.UTC(2027, 0, 1)])) + 365 * DAY;
+
+      // 預設時間窗不要被極端歷史年份（例如 1776 年成立的國家）拉開整條時間軸：
+      // 以資料分位數決定「主要活動期間」，完整範圍仍保留在 bounds，可隨時展開。
+      const quantile = (arr: number[], q: number) => {
+        if (arr.length === 0) return null;
+        const sorted = [...arr].sort((a, b) => a - b);
+        const idx = Math.min(sorted.length - 1, Math.max(0, Math.round(q * (sorted.length - 1))));
+        return sorted[idx];
+      };
+      const denseFrom = quantile(starts, 0.05);
+      const denseTo = quantile(ends.length ? ends : starts, 0.95);
+      const spanYears = (fullTo - fullFrom) / (365.25 * DAY);
+      let winFrom = fullFrom;
+      let winTo = fullTo;
+      if (spanYears > 40 && denseFrom != null && denseTo != null) {
+        winFrom = Math.max(fullFrom, denseFrom - 365 * DAY);
+        winTo = Math.min(fullTo, denseTo + 365 * DAY);
+        if (winTo - winFrom < 3 * 365 * DAY) {
+          winFrom = fullFrom;
+          winTo = fullTo;
+        }
+      }
       set({
         model,
         status: 'ready',
-        bounds: [from - 30 * DAY, to],
-        window: { from: from - 30 * DAY, to },
+        bounds: [fullFrom - 30 * DAY, fullTo],
+        window: { from: winFrom, to: winTo },
       });
     } catch (err) {
       set({ status: 'error', error: err instanceof Error ? err.message : String(err) });
