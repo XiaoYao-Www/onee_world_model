@@ -1,0 +1,336 @@
+/* 時間軸視圖與時間 dock 樣式。
+   dock 的高度由 theme.css 的 --time-h 控制，內容必須在 116px 內可操作。 */
+
+.tdock {
+  gap: 4px;
+}
+.tdock-head {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-wrap: nowrap;
+  min-width: 0;
+}
+.tdock-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  color: var(--text-3);
+  flex: none;
+}
+.tdock-head .time-readout {
+  flex: 0 1 auto;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 12px;
+}
+.tdock-duration { color: var(--text-3); font-size: 11px; margin-left: 4px; }
+.tdock-count { flex: none; }
+.tdock-play { width: 28px; height: 28px; flex: none; }
+.tdock-speed > button { padding: 4px 8px; font-size: 11px; }
+.tdock-reset { flex: none; }
+
+.tdock-track {
+  position: relative;
+  min-height: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: linear-gradient(180deg, rgba(10, 17, 30, 0.9), rgba(5, 9, 17, 0.95));
+  overflow: hidden;
+  cursor: grab;
+  user-select: none;
+}
+.tdock.is-dragging .tdock-track { cursor: grabbing; }
+.tdock-track:focus-within { border-color: rgba(125, 211, 252, 0.32); }
+
+.tdock-hist {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  gap: 0;
+  padding: 4px 0 0;
+  pointer-events: none;
+}
+.tdock-bar {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 2px;
+  border-radius: 1px 1px 0 0;
+  background: rgba(126, 160, 214, 0.16);
+  transition: background 0.12s linear;
+}
+.tdock-bar.has-data { background: rgba(126, 160, 214, 0.3); }
+.tdock-bar.is-in { background: rgba(125, 211, 252, 0.5); }
+.tdock-bar.is-in.has-data { background: linear-gradient(180deg, rgba(125, 211, 252, 0.9), rgba(125, 211, 252, 0.35)); }
+
+.tdock-selection {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-left: 1px solid rgba(125, 211, 252, 0.6);
+  border-right: 1px solid rgba(125, 211, 252, 0.6);
+  background: linear-gradient(180deg, rgba(125, 211, 252, 0.11), rgba(125, 211, 252, 0.05));
+  box-shadow: inset 0 1px 0 rgba(125, 211, 252, 0.22);
+  pointer-events: none;
+}
+.tdock-handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 16px;
+  pointer-events: none;
+  outline: none;
+}
+.tdock-handle.is-from { left: -8px; }
+.tdock-handle.is-to { right: -8px; }
+.tdock-handle span {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 9px;
+  height: 32px;
+  border-radius: 5px;
+  background: linear-gradient(180deg, #eaf7ff, #addcf5);
+  border: 1px solid rgba(4, 7, 14, 0.7);
+  box-shadow: 0 0 10px rgba(125, 211, 252, 0.55);
+}
+.tdock-handle:focus-visible span {
+  outline: 2px solid #eaf7ff;
+  outline-offset: 2px;
+  box-shadow: 0 0 16px rgba(125, 211, 252, 0.9);
+}
+.tdock-baseline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: rgba(126, 160, 214, 0.22);
+  pointer-events: none;
+}
+.tdock-hint {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 10.5px;
+  color: var(--text-3);
+  background: rgba(5, 9, 17, 0.72);
+  padding: 2px 9px;
+  border-radius: 999px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+@media (max-width: 1080px) {
+  .tdock-count { display: none; }
+  .tdock-speed { display: none; }
+}
+@media (max-width: 720px) {
+  .tdock-duration { display: none; }
+  .tdock-title span { display: none; }
+  .tdock-reset { padding: 0 8px; }
+}
+
+/* ── TimelineView ───────────────────────────────────── */
+.tl-root {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background:
+    radial-gradient(1100px 700px at 15% -10%, rgba(56, 99, 170, 0.16), transparent 62%),
+    linear-gradient(180deg, #050812, #04060d);
+  --tl-axis-h: 28px;
+  --tl-row-h: 27px;
+  --tl-label-w: 172px;
+}
+.tl-head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--line);
+  flex: none;
+}
+.tl-head-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12.5px;
+  letter-spacing: 0.1em;
+  color: var(--text-2);
+}
+.tl-stats {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 3px 12px;
+  font-size: 11px;
+  color: var(--text-3);
+}
+.tl-stats b { color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; }
+.tl-actions { display: flex; align-items: center; gap: 5px; margin-left: auto; flex-wrap: wrap; }
+.tl-legend {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10.5px;
+  color: var(--text-3);
+}
+.tl-legend i {
+  display: inline-block;
+  width: 16px;
+  height: 8px;
+  border-radius: 2px;
+  margin-right: 3px;
+}
+.tl-legend .precise { background: rgba(125, 211, 252, 0.75); }
+.tl-legend .vague {
+  background: linear-gradient(90deg, transparent, rgba(125, 211, 252, 0.6) 30%, rgba(125, 211, 252, 0.6) 70%, transparent);
+  border-top: 1px dashed rgba(125, 211, 252, 0.7);
+}
+
+.tl-body { flex: 1; min-height: 0; display: flex; }
+.tl-label-col {
+  width: var(--tl-label-w);
+  flex: none;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--line);
+  background: rgba(6, 10, 19, 0.5);
+}
+.tl-label-axis {
+  height: var(--tl-axis-h);
+  flex: none;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--text-3);
+}
+.tl-label-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+}
+.tl-label-inner {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  will-change: transform;
+}
+.tl-lane-label {
+  height: var(--tl-row-h);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 8px 0 10px;
+  border-bottom: 1px solid rgba(126, 160, 214, 0.06);
+  font-size: 11.5px;
+  color: var(--text-2);
+  min-width: 0;
+}
+.tl-lane-label.is-other { color: var(--text-3); font-style: italic; }
+.tl-lane-name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tl-lane-count {
+  flex: none;
+  font-size: 10px;
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+.tl-scroll {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: relative;
+}
+.tl-axis {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  display: block;
+  width: 100%;
+}
+.tl-plot { display: block; width: 100%; cursor: grab; }
+.tl-plot.is-panning { cursor: grabbing; }
+
+.tl-tip {
+  position: absolute;
+  z-index: 12;
+  pointer-events: none;
+  width: max-content;
+  max-width: 300px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--line-strong);
+  background: rgba(8, 13, 24, 0.95);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(10px);
+  display: grid;
+  gap: 3px;
+}
+.tl-tip-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10.5px;
+  color: var(--text-3);
+}
+.tl-tip-title { font-size: 12.5px; font-weight: 600; color: #eef6ff; line-height: 1.35; }
+.tl-tip-row { font-size: 10.5px; color: var(--text-2); }
+.tl-tip-row.is-vague { color: #ffe8b0; }
+.tl-tip-hint { font-size: 10px; color: var(--text-3); border-top: 1px solid var(--line); padding-top: 3px; }
+
+.tl-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  pointer-events: none;
+  background: rgba(4, 6, 13, 0.25);
+}
+.tl-empty {
+  width: min(430px, 92%);
+  padding: 20px;
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-3);
+  pointer-events: auto;
+}
+.tl-empty strong { font-size: 14px; color: var(--text); font-weight: 600; }
+.tl-empty p { margin: 0; line-height: 1.65; }
+
+@media (max-width: 900px) {
+  .tl-root { --tl-label-w: 132px; --tl-row-h: 25px; }
+  .tl-head { padding: 8px 10px; }
+  .tl-stats .tl-hide-sm { display: none; }
+}
+@media (max-width: 720px) {
+  .tl-root { --tl-label-w: 104px; }
+  .tl-lane-label { font-size: 10.5px; padding-left: 7px; }
+  .tl-head-title span { display: none; }
+  .tl-legend { display: none; }
+  .tl-tip { display: none; }
+}
+
+.tl-plot { touch-action: none; }

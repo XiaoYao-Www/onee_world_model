@@ -1,0 +1,140 @@
+/* 篩選面板樣式（僅本功能使用） */
+.fp {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.fp-head {
+  padding: 11px 14px 9px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.fp-head-row { display: flex; align-items: center; gap: 7px; }
+.fp-head-title { font-size: 13px; font-weight: 560; color: var(--text); }
+.fp-head-note { font-size: 10.5px; color: var(--text-3); line-height: 1.45; }
+
+.fp-body { min-height: 0; flex: 1 1 auto; }
+
+.fp-presets { padding: 10px 14px 12px; border-bottom: 1px solid var(--line); }
+.fp-preset-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 7px; }
+.fp-preset {
+  border: 1px dashed var(--line);
+  background: rgba(17, 26, 44, 0.45);
+  color: var(--text-2);
+  font-size: 11.5px;
+  padding: 4px 9px;
+  border-radius: 7px;
+  cursor: pointer;
+}
+.fp-preset:hover { border-color: var(--line-strong); color: var(--text); }
+.fp-preset.is-on { border-style: solid; border-color: rgba(125, 211, 252, 0.4); background: rgba(125, 211, 252, 0.12); color: #eaf7ff; }
+
+.fp-group { border-bottom: 1px solid var(--line); }
+.fp-group-head { display: flex; align-items: center; gap: 4px; padding-right: 8px; }
+.fp-group-toggle {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 4px 9px 12px;
+  background: transparent;
+  border: 0;
+  color: var(--text-2);
+  cursor: pointer;
+  text-align: left;
+  font-size: 12px;
+}
+.fp-group-toggle:hover { color: var(--text); }
+.fp-group-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.fp-group-name { font-size: 12px; letter-spacing: 0.05em; font-weight: 540; }
+.fp-group-sel {
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: rgba(125, 211, 252, 0.18);
+  border: 1px solid rgba(125, 211, 252, 0.36);
+  color: #dff3ff;
+  font-size: 10px;
+  display: inline-grid;
+  place-items: center;
+}
+.fp-group-count { font-size: 10px; color: var(--text-3); }
+.fp-group-clear {
+  border: 0;
+  background: transparent;
+  color: var(--text-3);
+  font-size: 10.5px;
+  cursor: pointer;
+  padding: 2px 4px;
+}
+.fp-group-clear:hover { color: var(--text); text-decoration: underline; }
+.fp-caret { display: inline-flex; transition: transform 0.15s; }
+.fp-caret.is-open { transform: rotate(90deg); }
+
+.fp-group-body {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  padding: 0 12px 11px;
+}
+.fp-group-body.is-column { flex-direction: column; flex-wrap: nowrap; gap: 6px; }
+
+.fp-chip {
+  font-size: 11px;
+  padding: 2.5px 8px;
+  max-width: 100%;
+}
+.fp-chip .fp-chip-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fp-chip-count { font-size: 9.5px; color: var(--text-3); margin-left: 2px; }
+.fp-chip.is-on .fp-chip-count { color: rgba(234, 247, 255, 0.7); }
+.fp-more {
+  border: 0;
+  background: transparent;
+  color: var(--text-3);
+  font-size: 10.5px;
+  cursor: pointer;
+  padding: 2px 4px;
+}
+.fp-more:hover { color: var(--text); text-decoration: underline; }
+
+.fp-toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11.5px;
+  color: var(--text-2);
+  background: transparent;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+.fp-switch {
+  width: 28px;
+  height: 16px;
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  background: rgba(6, 11, 22, 0.9);
+  position: relative;
+  flex: none;
+}
+.fp-switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--text-3);
+  transition: transform 0.15s, background 0.15s;
+}
+.fp-switch.is-on { background: rgba(125, 211, 252, 0.24); border-color: rgba(125, 211, 252, 0.45); }
+.fp-switch.is-on::after { transform: translateX(12px); background: var(--accent); }
+.fp-toggle-row:focus-visible .fp-switch { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.fp-foot { padding: 10px 14px; font-size: 10.5px; color: var(--text-3); line-height: 1.5; }

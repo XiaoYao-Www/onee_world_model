@@ -1,0 +1,189 @@
+/* 全域搜尋與分層結果（只新增本功能樣式，不改 theme.css） */
+
+.sb-panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 70;
+  background: rgba(7, 12, 22, 0.98);
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(18px);
+  max-height: min(64vh, 540px);
+  overflow-y: auto;
+  padding: 5px 0 4px;
+}
+
+.sb-group-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px 4px;
+  font-size: 10.5px;
+  letter-spacing: 0.13em;
+  color: var(--text-3);
+  border-top: 1px solid var(--line);
+  margin-top: 3px;
+}
+.sb-group-head:first-child { border-top: 0; margin-top: 0; }
+
+.sb-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+  padding: 6px 12px;
+  background: transparent;
+  border: 0;
+  border-left: 2px solid transparent;
+  cursor: pointer;
+  color: var(--text);
+}
+.sb-row:hover,
+.sb-row.is-active { background: rgba(126, 160, 214, 0.1); border-left-color: var(--accent); }
+.sb-row:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.sb-row.is-derived { background: rgba(246, 193, 119, 0.045); }
+.sb-row.is-derived:hover,
+.sb-row.is-derived.is-active { background: rgba(246, 193, 119, 0.1); border-left-color: var(--gold); }
+
+.sb-dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+.sb-row-main { min-width: 0; flex: 1 1 auto; display: flex; flex-direction: column; gap: 1px; }
+.sb-row-title { font-size: 12.5px; font-weight: 520; line-height: 1.35; }
+.sb-row-sub { font-size: 11px; color: var(--text-3); line-height: 1.35; }
+.sb-kind {
+  display: inline-block;
+  font-size: 9.5px;
+  line-height: 1.6;
+  padding: 0 5px;
+  margin-right: 5px;
+  border-radius: 4px;
+  border: 1px solid var(--line);
+  color: var(--text-2);
+  vertical-align: 1px;
+}
+.sb-tag {
+  font-size: 10px;
+  padding: 0 5px;
+  border-radius: 5px;
+  border: 1px solid var(--line);
+  color: var(--text-3);
+  white-space: nowrap;
+  line-height: 1.6;
+}
+.sb-tag.is-fact { color: #cfeeff; border-color: rgba(125, 211, 252, 0.32); }
+.sb-tag.is-derived { color: #ffe6bd; border-color: rgba(246, 193, 119, 0.3); background: rgba(246, 193, 119, 0.08); }
+
+.sb-hint { padding: 11px 14px 12px; display: flex; flex-direction: column; gap: 8px; }
+.sb-hint-title { font-size: 12px; color: var(--text); font-weight: 550; }
+.sb-hint .micro { line-height: 1.5; }
+.sb-example {
+  border: 1px solid var(--line);
+  background: rgba(17, 26, 44, 0.4);
+  color: var(--text-2);
+  border-radius: 7px;
+  padding: 3px 9px;
+  font-size: 11.5px;
+  cursor: pointer;
+}
+.sb-example:hover { color: var(--text); border-color: var(--line-strong); }
+
+.sb-foot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px 3px;
+  border-top: 1px solid var(--line);
+  margin-top: 4px;
+  font-size: 10.5px;
+  color: var(--text-3);
+}
+
+/* ===== 左側分層結果 ===== */
+.sr {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.sr-head { padding: 11px 14px 9px; border-bottom: 1px solid var(--line); }
+.sr-head-title { font-size: 13px; color: var(--text); font-weight: 550; display: flex; align-items: center; gap: 6px; }
+.sr-query { font-size: 11.5px; color: var(--text-3); margin-top: 3px; }
+.sr-body { min-height: 0; flex: 1 1 auto; max-height: min(48vh, 560px); overflow-y: auto; overscroll-behavior: contain; }
+.sr-group { border-bottom: 1px solid var(--line); }
+.sr-group.is-derived { background: rgba(246, 193, 119, 0.035); }
+.sr-group-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 8px 12px;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  color: var(--text-2);
+  text-align: left;
+}
+.sr-group-head:hover { background: rgba(126, 160, 214, 0.06); color: var(--text); }
+.sr-group-head:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.sr-group-name { font-size: 11.5px; letter-spacing: 0.08em; font-weight: 560; }
+.sr-group-count {
+  font-size: 10px;
+  color: var(--text-3);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0 6px;
+  line-height: 1.6;
+}
+.sr-group-hint { font-size: 10.5px; color: var(--text-3); }
+
+.sr-item {
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+  width: 100%;
+  text-align: left;
+  padding: 8px 12px 9px 14px;
+  border: 0;
+  border-left: 2px solid transparent;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+}
+.sr-item:hover { background: rgba(126, 160, 214, 0.07); }
+.sr-item.is-on { background: rgba(125, 211, 252, 0.1); border-left-color: var(--accent); }
+.sr-item.is-derived { border-left-color: rgba(246, 193, 119, 0.45); }
+.sr-item.is-derived:hover { background: rgba(246, 193, 119, 0.08); }
+.sr-item:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.sr-item-main { min-width: 0; flex: 1 1 auto; }
+.sr-item-title-row { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.sr-item-title { font-size: 12.5px; line-height: 1.35; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sr-kind {
+  flex: none;
+  font-size: 9.5px;
+  line-height: 1.6;
+  padding: 0 5px;
+  border-radius: 4px;
+  border: 1px solid var(--line);
+  color: var(--text-2);
+}
+.sr-item.is-on .sr-item-title { color: #f0faff; }
+.sr-item-reason { font-size: 11px; color: var(--text-3); line-height: 1.4; margin-top: 2px; }
+.sr-score { height: 2px; border-radius: 2px; background: rgba(126, 160, 214, 0.14); margin-top: 5px; overflow: hidden; }
+.sr-score > i { display: block; height: 100%; background: linear-gradient(90deg, rgba(125, 211, 252, 0.55), rgba(167, 139, 250, 0.45)); }
+.sr-more {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--text-3);
+  font-size: 11px;
+  padding: 6px 14px 8px;
+  text-align: left;
+  cursor: pointer;
+}
+.sr-more:hover { color: var(--text); text-decoration: underline; }
+.sr-empty { padding: 26px 18px; }
+.sr-tilde { opacity: 0.6; }
+
+.search-input::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; }

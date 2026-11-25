@@ -1,0 +1,375 @@
+/* 3D 宇宙視圖樣式。只使用全域設計變數，不覆寫其他模組的類別。 */
+
+.univ-root {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(900px 620px at 50% 42%, rgba(24, 39, 74, 0.55), transparent 68%),
+    radial-gradient(1400px 900px at 50% 110%, rgba(20, 28, 58, 0.5), transparent 70%),
+    #04060d;
+}
+
+.univ-canvas {
+  position: absolute;
+  inset: 0;
+  outline: none;
+  cursor: grab;
+}
+.univ-canvas:active { cursor: grabbing; }
+
+.univ-labels {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 3;
+}
+.univ-label {
+  position: absolute;
+  left: 0;
+  top: 0;
+  will-change: transform, opacity;
+  opacity: 1;
+  transition: opacity 0.18s ease;
+}
+.univ-label-inner {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transform: translate(-50%, -150%);
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(126, 160, 214, 0.22);
+  background: rgba(5, 9, 18, 0.72);
+  backdrop-filter: blur(6px);
+  color: #b9cae2;
+  font-size: 11px;
+  line-height: 1.5;
+  white-space: nowrap;
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.univ-label-inner i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex: none;
+  box-shadow: 0 0 6px currentColor;
+}
+.univ-label-inner b { font-weight: 520; overflow: hidden; text-overflow: ellipsis; }
+.univ-label.is-selected .univ-label-inner {
+  border-color: rgba(125, 211, 252, 0.5);
+  background: rgba(10, 22, 40, 0.9);
+  color: #eaf7ff;
+  box-shadow: 0 0 18px rgba(125, 211, 252, 0.18);
+}
+.univ-label.is-hover .univ-label-inner {
+  border-color: rgba(222, 233, 250, 0.42);
+  color: #eef5ff;
+}
+
+/* ── HUD ─────────────────────────────────────────────── */
+.univ-hud { max-width: min(calc(100% - 28px), 430px); }
+.univ-hud-card {
+  padding: 11px 12px 10px;
+  display: grid;
+  gap: 8px;
+  background: rgba(8, 13, 24, 0.82);
+}
+.univ-hud-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  letter-spacing: 0.13em;
+  color: var(--text-2);
+}
+.univ-hud-title .badge { letter-spacing: 0; }
+.univ-hud-stats {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  font-size: 11.5px;
+  color: var(--text-3);
+}
+.univ-hud-stats b {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 3px;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  margin-left: 5px;
+  font-variant-numeric: tabular-nums;
+}
+.univ-hud-stats b em {
+  font-style: normal;
+  font-size: 10.5px;
+  font-weight: 400;
+  color: var(--text-3);
+  margin-left: 1px;
+}
+.univ-stat-hl b { color: #d9f2ff; }
+.univ-kind-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  font-size: 10.5px;
+  color: var(--text-3);
+  border-top: 1px solid var(--line);
+  padding-top: 7px;
+}
+.univ-kind-count { display: inline-flex; align-items: center; gap: 4px; }
+.univ-kind-count i { width: 6px; height: 6px; border-radius: 50%; opacity: 0.9; }
+.univ-kind-count em {
+  font-style: normal;
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+}
+.univ-hud-actions { display: flex; flex-wrap: wrap; gap: 5px; }
+.univ-hud-actions .btn { padding: 0 8px; }
+.univ-busy {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 11px;
+  color: #cfeeff;
+  border-top: 1px solid var(--line);
+  padding-top: 7px;
+}
+.univ-busy .mono { color: var(--text-3); }
+
+.univ-tip {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  z-index: 6;
+  font-size: 11px;
+  color: var(--text-3);
+  background: rgba(5, 9, 18, 0.6);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 4px 11px;
+  backdrop-filter: blur(8px);
+  pointer-events: none;
+}
+
+/* ── 圖例 ────────────────────────────────────────────── */
+.univ-legend {
+  width: 306px;
+  max-width: calc(100% - 28px);
+  overflow: hidden;
+  background: rgba(8, 13, 24, 0.9);
+}
+.univ-legend.is-open { display: flex; flex-direction: column; max-height: min(58vh, 480px); }
+.univ-legend-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 0;
+  background: transparent;
+  color: var(--text-2);
+  font-size: 12px;
+  cursor: pointer;
+  text-align: left;
+}
+.univ-legend-head:hover { color: var(--text); background: rgba(126, 160, 214, 0.06); }
+.univ-legend-body {
+  padding: 0 12px 12px;
+  min-height: 0;
+  overflow-y: auto;
+}
+.univ-legend-sec {
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  color: var(--text-3);
+  margin: 9px 0 5px;
+}
+.univ-legend-edge {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr);
+  gap: 2px 7px;
+  padding: 4px 0;
+  border-top: 1px solid rgba(126, 160, 214, 0.08);
+}
+.univ-legend-edge svg { grid-row: span 2; align-self: center; }
+.univ-legend-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  color: var(--text);
+}
+.univ-derived-badge { font-size: 9px; padding: 0 5px; }
+.univ-legend-hint { font-size: 10.5px; line-height: 1.45; color: var(--text-3); }
+.univ-legend-kinds { display: flex; flex-wrap: wrap; gap: 5px 12px; }
+.univ-legend-kind {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--text-2);
+}
+.univ-legend-note {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+  font-size: 10.5px;
+  line-height: 1.6;
+  color: var(--text-3);
+}
+.univ-legend-peek {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 12px 10px;
+  font-size: 10.5px;
+  color: var(--text-3);
+}
+.univ-legend-peek i { width: 6px; height: 6px; border-radius: 50%; }
+
+/* ── Hover 卡 ───────────────────────────────────────── */
+.univ-hover-card { display: grid; gap: 4px; }
+.univ-hover-head { display: flex; align-items: center; gap: 6px; }
+.univ-hover-kind { font-size: 10.5px; letter-spacing: 0.08em; color: var(--text-3); }
+.univ-hover-title { font-size: 13.5px; font-weight: 600; color: #eef6ff; line-height: 1.35; }
+.univ-hover-sum {
+  font-size: 11.5px;
+  line-height: 1.55;
+  color: var(--text-2);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.univ-hover-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  font-size: 10.5px;
+  color: var(--text-3);
+  border-top: 1px solid var(--line);
+  padding-top: 5px;
+  margin-top: 2px;
+}
+.univ-hover-domain { color: var(--text-2); }
+.univ-hover-geo {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10.5px;
+  color: var(--text-3);
+}
+.univ-hover-foot { font-size: 10px; color: var(--text-3); opacity: 0.8; }
+
+/* ── 選取焦點卡 ─────────────────────────────────────── */
+.univ-focus-card {
+  position: absolute;
+  right: 14px;
+  bottom: 46px;
+  z-index: 7;
+  width: 296px;
+  max-width: calc(100% - 28px);
+  padding: 10px 12px 11px;
+  display: grid;
+  gap: 6px;
+  background: rgba(8, 13, 24, 0.92);
+}
+.univ-focus-head { display: flex; align-items: center; gap: 6px; }
+.univ-focus-kind { font-size: 10.5px; letter-spacing: 0.1em; color: var(--text-3); }
+.univ-focus-close { width: 22px; height: 22px; border-radius: 6px; }
+.univ-focus-title { font-size: 14px; font-weight: 620; color: #f2f9ff; line-height: 1.35; }
+.univ-focus-sum {
+  font-size: 11.5px;
+  line-height: 1.6;
+  color: var(--text-2);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.univ-focus-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  font-size: 10.5px;
+  color: var(--text-3);
+}
+.univ-focus-meta b { color: var(--text); font-weight: 600; }
+.univ-focus-actions { display: flex; gap: 5px; margin-top: 2px; }
+
+/* ── 覆蓋層 ─────────────────────────────────────────── */
+.univ-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 9;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(4, 6, 13, 0.42);
+  backdrop-filter: blur(2px);
+}
+.univ-empty {
+  width: min(420px, 92%);
+  padding: 22px 20px;
+  display: grid;
+  justify-items: center;
+  gap: 9px;
+  text-align: center;
+  color: var(--text-3);
+  font-size: 12px;
+}
+.univ-empty strong { font-size: 14px; color: var(--text); font-weight: 600; }
+.univ-empty p { margin: 0; line-height: 1.65; }
+.univ-empty .row { margin-top: 4px; }
+.univ-fallback-list {
+  width: 100%;
+  max-height: 220px;
+  margin-top: 4px;
+  border-top: 1px solid var(--line);
+  padding-top: 6px;
+}
+
+.univ-filter-note {
+  position: absolute;
+  right: 14px;
+  top: 14px;
+  z-index: 7;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 27px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(251, 191, 36, 0.28);
+  background: rgba(30, 24, 8, 0.7);
+  color: #ffe8b0;
+  font-size: 11px;
+  cursor: pointer;
+}
+.univ-filter-note:hover { background: rgba(46, 36, 10, 0.85); }
+
+@media (max-width: 720px) {
+  .univ-hud { max-width: calc(100% - 20px); left: 10px; top: 8px; }
+  .univ-kind-counts { display: none; }
+  .univ-legend { width: 250px; left: 10px; bottom: 10px; }
+  .univ-focus-card { display: none; }
+  .univ-tip { display: none; }
+  .univ-hover-card { display: none; }
+}
+
+.univ-derived-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 5px;
+  font-size: 10.5px;
+  line-height: 1.5;
+  color: #cfe4ff;
+  border-top: 1px solid var(--line);
+  padding-top: 6px;
+}

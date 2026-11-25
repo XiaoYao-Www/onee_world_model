@@ -1,0 +1,248 @@
+/* 2.5D 地圖視圖樣式。 */
+
+.mapv-root {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #04060d;
+}
+.mapv-canvas {
+  position: absolute;
+  inset: 0;
+}
+.mapv-canvas .maplibregl-canvas { outline: none; }
+
+/* ── 圖層面板 ───────────────────────────────────────── */
+.mapv-layers {
+  position: absolute;
+  right: 14px;
+  top: 12px;
+  z-index: 8;
+  width: 216px;
+  max-width: calc(100% - 24px);
+  padding: 9px 10px 10px;
+  display: grid;
+  gap: 8px;
+  background: rgba(8, 13, 24, 0.9);
+}
+.mapv-layers-head {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11.5px;
+  letter-spacing: 0.12em;
+  color: var(--text-2);
+}
+.mapv-layer-list { display: grid; gap: 2px; }
+.mapv-layer-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  padding: 4px 6px;
+  border-radius: 7px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-3);
+  font-size: 12px;
+  cursor: pointer;
+  text-align: left;
+}
+.mapv-layer-row:hover { background: rgba(126, 160, 214, 0.08); color: var(--text-2); }
+.mapv-layer-row.is-on { color: var(--text); }
+.mapv-layer-row > i { width: 8px; height: 8px; border-radius: 50%; opacity: 0.85; flex: none; }
+.mapv-check {
+  width: 13px;
+  height: 13px;
+  border-radius: 4px;
+  border: 1px solid var(--line-strong);
+  display: grid;
+  place-items: center;
+  flex: none;
+  color: #eaf7ff;
+}
+.mapv-layer-row.is-on .mapv-check { background: rgba(125, 211, 252, 0.22); border-color: rgba(125, 211, 252, 0.5); }
+.mapv-layer-name { flex: 1 1 auto; }
+.mapv-layer-count {
+  font-size: 10.5px;
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+.mapv-basemap { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.mapv-basemap .seg > button { padding: 4px 9px; font-size: 11px; }
+.mapv-actions { display: flex; gap: 5px; }
+.mapv-actions .btn { flex: 1 1 auto; padding: 0 8px; }
+.mapv-warn {
+  display: flex;
+  align-items: flex-start;
+  gap: 5px;
+  font-size: 10.5px;
+  line-height: 1.5;
+  color: #ffe8b0;
+  border-top: 1px solid var(--line);
+  padding-top: 6px;
+}
+
+/* ── 圖例與來源 ─────────────────────────────────────── */
+.mapv-legend {
+  position: absolute;
+  left: 14px;
+  bottom: 14px;
+  z-index: 7;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  max-width: min(460px, calc(100% - 260px));
+  padding: 6px 11px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgba(5, 9, 18, 0.75);
+  backdrop-filter: blur(8px);
+  font-size: 10.5px;
+  color: var(--text-3);
+}
+.mapv-legend span { display: inline-flex; align-items: center; gap: 5px; }
+.mapv-legend i { display: inline-block; flex: none; }
+.mapv-circle {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #7dd3fc 40%, rgba(125, 211, 252, 0.15) 70%);
+  border: 1px solid rgba(125, 211, 252, 0.6);
+}
+.mapv-halo {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(125, 211, 252, 0.35), transparent 65%);
+  border: 1px dashed rgba(125, 211, 252, 0.35);
+}
+.mapv-dash {
+  width: 18px;
+  height: 0;
+  border-top: 1.5px dashed rgba(246, 193, 119, 0.8);
+}
+.mapv-attribution {
+  position: absolute;
+  right: 12px;
+  bottom: 10px;
+  z-index: 8;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 3px 6px;
+  max-width: min(430px, calc(100% - 28px));
+  justify-content: flex-end;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: rgba(4, 7, 14, 0.72);
+  color: var(--text-3);
+  font-size: 10px;
+  line-height: 1.45;
+}
+.mapv-attribution a { color: var(--text-2); text-decoration: underline; text-underline-offset: 2px; }
+.mapv-attribution a:hover { color: #eaf7ff; }
+.mapv-attribution-sep { opacity: 0.5; }
+
+/* ── 選取提示 ───────────────────────────────────────── */
+.mapv-selected-tip {
+  position: absolute;
+  left: 50%;
+  bottom: 46px;
+  transform: translateX(-50%);
+  z-index: 8;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: min(460px, calc(100% - 40px));
+  padding: 6px 8px 6px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(125, 211, 252, 0.32);
+  background: rgba(8, 16, 30, 0.92);
+  box-shadow: var(--shadow);
+  font-size: 12px;
+  color: var(--text);
+}
+.mapv-selected-tip .truncate { max-width: 240px; }
+
+/* ── 覆蓋層 ─────────────────────────────────────────── */
+.mapv-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 9;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  pointer-events: none;
+  background: rgba(4, 6, 13, 0.35);
+}
+.mapv-overlay-soft { background: rgba(4, 6, 13, 0.24); }
+.mapv-empty {
+  width: min(440px, 92%);
+  max-height: min(70vh, 460px);
+  padding: 20px;
+  display: grid;
+  justify-items: center;
+  gap: 9px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-3);
+  pointer-events: auto;
+  overflow: hidden;
+}
+.mapv-empty strong { font-size: 14px; color: var(--text); font-weight: 600; }
+.mapv-empty p { margin: 0; line-height: 1.65; }
+.mapv-empty .row { margin-top: 4px; }
+.mapv-fallback {
+  width: 100%;
+  max-height: 240px;
+  margin-top: 4px;
+  border-top: 1px solid var(--line);
+  padding-top: 6px;
+}
+
+/* ── Popup ──────────────────────────────────────────── */
+.map-pop { display: grid; gap: 4px; min-width: 180px; }
+.map-pop-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  color: var(--text-3);
+}
+.map-pop-head i { width: 7px; height: 7px; border-radius: 50%; }
+.map-pop-title { font-size: 13.5px; font-weight: 600; color: #eef6ff; line-height: 1.35; }
+.map-pop-row {
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr);
+  gap: 6px;
+  font-size: 11px;
+  line-height: 1.5;
+}
+.map-pop-key { color: var(--text-3); }
+.map-pop-row span:last-child { color: var(--text-2); }
+.map-pop-hint {
+  margin-top: 4px;
+  padding-top: 5px;
+  border-top: 1px solid var(--line);
+  font-size: 10px;
+  color: var(--text-3);
+}
+
+@media (max-width: 900px) {
+  .mapv-legend { max-width: calc(100% - 40px); bottom: 52px; }
+  .mapv-attribution { max-width: calc(100% - 24px); }
+}
+@media (max-width: 720px) {
+  .mapv-layers {
+    right: 8px;
+    top: 8px;
+    width: 184px;
+    padding: 8px;
+  }
+  .mapv-legend { display: none; }
+  .mapv-attribution { font-size: 9px; right: 8px; bottom: 6px; }
+  .mapv-selected-tip { bottom: 40px; }
+  .mapv-selected-tip .truncate { max-width: 140px; }
+}
