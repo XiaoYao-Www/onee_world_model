@@ -196,8 +196,10 @@ export function describeEdge(edge: WmEdge): string {
 
 /** 節點視覺大小（依連結數）：提供給圖例說明與場景共用。 */
 export function nodeSizeForDegree(degree: number): number {
-  const base = 1.55 + Math.log2(1 + Math.max(0, degree)) * 0.62;
-  return Math.min(4.6, Math.max(1.55, base));
+  // 世界單位；在預設鏡頭（約 2.3 倍宇宙半徑）下，一般節點約 5–9 像素，
+  // 高度數節點明顯較大，才不會在總覽時變成看不見的小點。
+  const base = 3.1 + Math.log2(1 + Math.max(0, degree)) * 0.95;
+  return Math.min(9, Math.max(3.1, base));
 }
 
 export { kindStyle, relationLabel };

@@ -1,7 +1,7 @@
 {
-  "data_version": "20261125.2046",
+  "data_version": "20261126.0732",
   "model_version": "v1",
-  "generated_at": "2026-11-25T12:46:03.002Z",
+  "generated_at": "2026-11-25T23:32:47.648Z",
   "counts": {
     "nodes": 251,
     "edges": 353,
@@ -25,8 +25,8 @@
     "event",
     "analysis",
     "hypothesis",
-    "timeline",
     "scenario",
+    "timeline",
     "topic"
   ],
   "disciplines": [
@@ -191,7 +191,7 @@
   ],
   "has_demo": true,
   "notes": [
-    "由 DSH 匯出器於 2026-11-25 產生；世界模型本體在 Obsidian／FNS。",
+    "由 DSH 匯出器於 2026-11-26 產生；世界模型本體在 Obsidian／FNS。",
     "含 122 個示範節點，僅供展示，不代表本體事實。"
   ]
 }

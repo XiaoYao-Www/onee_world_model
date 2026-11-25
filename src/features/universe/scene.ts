@@ -81,6 +81,11 @@ interface EdgeBatch {
 
 const TAU = Math.PI * 2;
 
+/** 世界單位 → 像素的換算（供 Points 的 gl_PointSize 使用）。 */
+function viewportPixelScale(pixelHeight: number, fovDeg: number): number {
+  return pixelHeight / (2 * Math.tan((fovDeg * Math.PI) / 360));
+}
+
 function hash01(key: string, salt = ''): number {
   return (fnv1a(`${salt}|${key}`) % 100000) / 100000;
 }
@@ -155,8 +160,8 @@ function nodeMaterial(color: string, wireframe: boolean): THREE.MeshStandardMate
     color: base,
     roughness: 0.58,
     metalness: 0.2,
-    emissive: base.clone().multiplyScalar(0.42),
-    emissiveIntensity: 0.55,
+    emissive: base.clone().multiplyScalar(0.55),
+    emissiveIntensity: 0.95,
     wireframe,
     transparent: true,
     opacity: 0.97,
@@ -235,6 +240,10 @@ export class UniverseScene {
 
   private nodeLayers = new Map<string, NodeLayer>();
   private nodeInfos = new Map<string, NodeMeta>();
+  private glowPoints: THREE.Points | null = null;
+  private glowAlpha: Float32Array | null = null;
+  private glowAlphaAttr: THREE.BufferAttribute | null = null;
+  private glowMat: THREE.ShaderMaterial | null = null;
   private nodeOrder: string[] = [];
   private batches: EdgeBatch[] = [];
   private derivedBatch: EdgeBatch | null = null;
@@ -403,6 +412,10 @@ export class UniverseScene {
     this.renderer.setSize(w, h, false);
     this.camera.aspect = w / h;
     this.camera.updateProjectionMatrix();
+    if (this.glowMat) {
+      const u = this.glowMat.uniforms.uPixelScale as { value: number } | undefined;
+      if (u) u.value = viewportPixelScale(h, this.camera.fov);
+    }
     this.needsRender = true;
   }
 
@@ -412,7 +425,8 @@ export class UniverseScene {
 
   private applyDefaultView(instant = false) {
     const r = this.frameRadius();
-    this.initialCamera.set(r * 0.24, r * 0.42, r * 1.62);
+    // 距離約 2.3 倍宇宙半徑：整個群集球都在視野內，節點仍保有好辨識的像素大小
+    this.initialCamera.set(r * 0.3, r * 0.52, r * 2.16);
     this.controls.minDistance = Math.max(18, r * 0.06);
     this.controls.maxDistance = r * 6;
     if (instant) {
@@ -471,6 +485,7 @@ export class UniverseScene {
     this.nodeInfos.clear();
     this.nodeOrder = [];
     this.pickables = [];
+    this.disposeGlow();
 
     for (const batch of this.batches) this.disposeBatch(batch);
     this.batches = [];
@@ -558,6 +573,8 @@ export class UniverseScene {
       this.nodeRoot.add(mesh);
       this.pickables.push(mesh);
     }
+
+    this.buildGlow();
 
     if (opts.showEdges) this.buildEdgeBatches(edges);
 
@@ -915,6 +932,7 @@ export class UniverseScene {
       });
       layer.mesh.instanceMatrix.needsUpdate = true;
     }
+    this.syncGlowPositions();
     this.updateHalos();
   }
 
@@ -951,6 +969,7 @@ export class UniverseScene {
       });
       layer.alphaAttr.needsUpdate = true;
     }
+    this.syncGlowAlphas();
     this.applyEdgeMultipliers();
     this.updateHalos();
   }
@@ -1093,6 +1112,121 @@ export class UniverseScene {
     }
   }
 
+  // ── 節點柔光層 ────────────────────────────────────────────────
+  // 節點本體在總覽距離可能只有幾像素；再加一層永遠面向相機的柔光點，
+  // 讓 1000+ 節點在縮小檢視時仍可辨識，並保留「柔和不刺眼」的宇宙感。
+
+  private buildGlow() {
+    const layout = this.layout;
+    if (!layout || layout.ids.length === 0) return;
+    const n = layout.ids.length;
+    const positions = new Float32Array(layout.pos);
+    const colors = new Float32Array(n * 3);
+    const sizes = new Float32Array(n);
+    const alphas = new Float32Array(n).fill(1);
+    const color = new THREE.Color();
+    this.nodeOrder.forEach((id, i) => {
+      const meta = this.nodeInfos.get(id);
+      if (!meta) return;
+      color.set(meta.color).convertLinearToSRGB();
+      colors[i * 3] = color.r;
+      colors[i * 3 + 1] = color.g;
+      colors[i * 3 + 2] = color.b;
+      sizes[i] = Math.max(3.4, meta.size * 5.2);
+    });
+    const geom = new THREE.BufferGeometry();
+    geom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geom.setAttribute('aColor', new THREE.BufferAttribute(colors, 3));
+    geom.setAttribute('aSize', new THREE.BufferAttribute(sizes, 1));
+    const alphaAttr = new THREE.BufferAttribute(alphas, 1);
+    alphaAttr.setUsage(THREE.DynamicDrawUsage);
+    geom.setAttribute('aAlpha', alphaAttr);
+    const mat = new THREE.ShaderMaterial({
+      uniforms: {
+        uPixelScale: { value: viewportPixelScale(this.container.clientHeight, this.camera.fov) },
+      },
+      vertexShader: `
+        attribute vec3 aColor;
+        attribute float aSize;
+        attribute float aAlpha;
+        uniform float uPixelScale;
+        varying vec3 vColor;
+        varying float vAlpha;
+        void main() {
+          vColor = aColor;
+          vAlpha = aAlpha;
+          vec4 mv = modelViewMatrix * vec4(position, 1.0);
+          float dist = max(0.001, -mv.z);
+          gl_PointSize = clamp(aSize * uPixelScale / dist, 1.5, 90.0);
+          gl_Position = projectionMatrix * mv;
+        }
+      `,
+      fragmentShader: `
+        varying vec3 vColor;
+        varying float vAlpha;
+        void main() {
+          vec2 d = gl_PointCoord - vec2(0.5);
+          float r = length(d) * 2.0;
+          if (r > 1.0) discard;
+          float a = pow(1.0 - r, 1.55) * 0.78 * vAlpha;
+          gl_FragColor = vec4(vColor, a);
+        }
+      `,
+      transparent: true,
+      depthWrite: false,
+      depthTest: true,
+      blending: THREE.AdditiveBlending,
+    });
+    const points = new THREE.Points(geom, mat);
+    points.frustumCulled = false;
+    points.renderOrder = 0;
+    this.glowPoints = points;
+    this.glowAlpha = alphas;
+    this.glowAlphaAttr = alphaAttr;
+    this.glowMat = mat;
+    this.nodeRoot.add(points);
+  }
+
+  private syncGlowPositions() {
+    const layout = this.layout;
+    const points = this.glowPoints;
+    if (!layout || !points) return;
+    const attr = points.geometry.getAttribute('position') as THREE.BufferAttribute;
+    (attr.array as Float32Array).set(layout.pos);
+    attr.needsUpdate = true;
+  }
+
+  private syncGlowAlphas() {
+    const points = this.glowPoints;
+    const alphas = this.glowAlpha;
+    if (!points || !alphas || !this.glowAlphaAttr) return;
+    const selected = this.selectedId;
+    this.nodeOrder.forEach((id, i) => {
+      let a = 0.82;
+      if (selected) {
+        if (id === selected) a = 1;
+        else if (this.neighbours.has(id)) a = 0.82;
+        else a = 0.2;
+      } else if (id === this.hoverId) {
+        a = 1;
+      }
+      alphas[i] = a;
+    });
+    this.glowAlphaAttr.needsUpdate = true;
+  }
+
+  private disposeGlow() {
+    if (this.glowPoints) {
+      this.nodeRoot.remove(this.glowPoints);
+      this.glowPoints.geometry.dispose();
+      (this.glowPoints.material as THREE.Material).dispose();
+      this.glowPoints = null;
+    }
+    this.glowAlpha = null;
+    this.glowAlphaAttr = null;
+    this.glowMat = null;
+  }
+
   // ── 互動 ─────────────────────────────────────────────────────
 
   private onPointerMove = (e: PointerEvent) => {
@@ -1231,6 +1365,7 @@ export class UniverseScene {
     for (const batch of this.batches) this.disposeBatch(batch);
     this.batches = [];
     this.disposeDerived();
+    this.disposeGlow();
     for (const layer of this.nodeLayers.values()) {
       layer.mesh.geometry.dispose();
       (layer.mesh.material as THREE.Material).dispose();

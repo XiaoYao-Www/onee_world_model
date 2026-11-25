@@ -69,7 +69,7 @@ function groupOf(kind: string): string {
 }
 
 export function clusterRadiusForCount(count: number): number {
-  return 2.4 + 4.3 * Math.cbrt(Math.max(1, count));
+  return 3.2 + 7.4 * Math.cbrt(Math.max(1, count));
 }
 
 export function buildLayout(nodes: WmNode[], edges: WmEdge[]): LayoutState {
@@ -85,7 +85,7 @@ export function buildLayout(nodes: WmNode[], edges: WmEdge[]): LayoutState {
   const index = new Map<string, number>();
   ids.forEach((id, i) => index.set(id, i));
 
-  const radius = Math.min(760, Math.max(190, 132 + Math.sqrt(Math.max(n, 1)) * 16));
+  const radius = Math.min(940, Math.max(210, 158 + Math.sqrt(Math.max(n, 1)) * 20));
 
   const pos = new Float32Array(n * 3);
   const home = new Float32Array(n * 3);
