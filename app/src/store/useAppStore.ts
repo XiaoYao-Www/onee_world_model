@@ -121,17 +121,19 @@ export const useAppStore = create<AppState>((set, get) => ({
         const idx = Math.min(sorted.length - 1, Math.max(0, Math.round(q * (sorted.length - 1))));
         return sorted[idx];
       };
-      const denseFrom = quantile(starts, 0.05);
-      const denseTo = quantile(ends.length ? ends : starts, 0.95);
+      const densityTo = quantile(ends.length ? ends : starts, 0.95);
+      const densityFrom = quantile(starts, 0.05);
       const spanYears = (fullTo - fullFrom) / (365.25 * DAY);
       let winFrom = fullFrom;
       let winTo = fullTo;
-      if (spanYears > 40 && denseFrom != null && denseTo != null) {
-        winFrom = Math.max(fullFrom, denseFrom - 365 * DAY);
-        winTo = Math.min(fullTo, denseTo + 365 * DAY);
-        if (winTo - winFrom < 3 * 365 * DAY) {
-          winFrom = fullFrom;
-          winTo = fullTo;
+      if (spanYears > 25 && densityTo != null) {
+        // 資料橫跨長期歷史時，預設聚焦「最近 12 年」，避免滑桿被 1776 年之類的
+        // 極端值拉成 200 多年而失去解析度；完整範圍仍保留在 bounds，可一鍵展開。
+        const recentFrom = densityTo - 12 * 365.25 * DAY;
+        winFrom = Math.max(fullFrom, densityFrom != null ? Math.min(recentFrom, densityFrom) : recentFrom);
+        winTo = Math.min(fullTo, densityTo + 30 * DAY);
+        if (winTo - winFrom < 5 * 365 * DAY) {
+          winFrom = Math.max(fullFrom, winTo - 12 * 365.25 * DAY);
         }
       }
       set({
